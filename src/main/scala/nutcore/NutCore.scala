@@ -76,6 +76,12 @@ case class NutCoreConfig (
     extensions =  "MCZicsrZifenceiSU",
     fakeExtensions = "A",
     functions = Seq("Privileged", "TLB")
+  ),
+  FormalOOConfig: RVConfig = RVConfig(
+    XLEN = 64,
+    extensions = "MC",
+    fakeExtensions = "",
+    functions = Seq()
   )
 )
 // Enable EnhancedLog will slow down simulation, 

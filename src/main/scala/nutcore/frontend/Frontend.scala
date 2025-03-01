@@ -25,6 +25,7 @@ import chisel3.experimental.IO
 
 import rvspeccore.checker._
 import rvspeccore.core.spec.instset.csr.{CSR => SpecCSR}
+import rvspeccore.core
 class FrontendIO(implicit val p: NutCoreConfig) extends Bundle with HasNutCoreConst {
   val imem = new SimpleBusUC(userBits = ICacheUserBundleWidth, addrBits = VAddrBits)
   val out = Vec(2, Decoupled(new DecodeIO))
@@ -51,6 +52,32 @@ class Frontend_ooo(implicit val p: NutCoreConfig) extends NutCoreModule with Has
   val ifu  = Module(new IFU_ooo)
   val ibf = Module(new IBF)
   val idu  = Module(new IDU)
+  def hasCSR(addr: UInt) :Bool = {
+    val speccsr = new SpecCSR()(64, p.FormalConfig)
+    MuxLookup(addr, false.B, speccsr.table.map { x => x.info.addr -> true.B })
+  }
+  if (p.Formal) {
+    // here is the earliest place to assume the inst
+    // before this, the inst may not been assemble/splite to 32bit
+
+    implicit val checker_xlen = 64
+    for(i <- 0 until ibf.io.out.length) {
+      val tmpInst = ibf.io.out(i).bits.instr
+      when(ibf.io.out(i).valid) {
+        // Some assume example
+        // assume(RVI.regImm(tmpInst) || RVI.loadStore(tmpInst))
+        // assume(RVI.loadStore(tmpInst))
+        // assume(RVI.loadStore(tmpInst))
+        assume(
+          (hasCSR(tmpInst(31,20)) && (RVZicsr.reg(tmpInst) || RVZicsr.imm(tmpInst)))
+          ||
+          (  RVI.regImm(tmpInst) || RVI.loadStore(tmpInst)  || RVI.other(tmpInst))
+          ||
+          (RVPrivileged.trap_return(tmpInst))
+        )
+      }
+    }
+  }
 
   pipelineConnect2(ifu.io.out, ibf.io.in, ifu.io.flushVec(0))
   PipelineVector2Connect(new CtrlFlowIO, ibf.io.out(0), ibf.io.out(1), idu.io.in(0), idu.io.in(1), ifu.io.flushVec(1), if (EnableOutOfOrderExec) 8 else 4)
