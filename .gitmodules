@@ -3,4 +3,4 @@
 	url = https://github.com/OpenXiangShan/difftest.git
 [submodule "riscv-spec-core"]
 	path = riscv-spec-core
-	url = https://github.com/iscas-tis/riscv-spec-core.git
+	url = https://github.com/chenjie35335/riscv-spec-core.git

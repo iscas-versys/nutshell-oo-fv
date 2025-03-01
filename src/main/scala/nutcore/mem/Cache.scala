@@ -609,7 +609,9 @@ class Cache_fake(implicit val cacheConfig: CacheConfig) extends CacheModule with
   io.in.resp.bits.cmd := Mux(ismmioRec, mmiocmd, memcmd)
 
   val memuser = RegEnable(io.in.req.bits.user.getOrElse(0.U), io.in.req.fire)
+  val memid = RegEnable(io.in.req.bits.id.getOrElse(0.U), io.in.req.fire)
   io.in.resp.bits.user.zip(if (userBits > 0) Some(memuser) else None).map { case (o,i) => o := i }
+  io.in.resp.bits.id.zip(if (userBits > 0) Some(memid) else None).map { case (o,i) => o := i }
 
   io.out.mem.req.bits.apply(addr = reqaddr,
     cmd = cmd, size = size,

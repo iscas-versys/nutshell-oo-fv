@@ -494,6 +494,9 @@ class ROB(implicit val p: NutCoreConfig) extends NutCoreModule with HasInstrType
   val retireMultiTerms = retireATerm && valid(ringBufferTail)(0) && valid(ringBufferTail)(1) && !instRedirect(0)
   BoringUtils.addSource(retireATerm, "perfCntCondMinstret")
   BoringUtils.addSource(retireMultiTerms, "perfCntCondMultiCommit")
+  if(p.Formal) {
+    val checker = rvspeccore.checker.
+  }
   
   if (!p.FPGAPlatform) {
     for (i <- 0 until RetireWidth) {

@@ -12,7 +12,7 @@ class NutCoreFormalSpec extends AnyFlatSpec with Formal with ChiselScalatestTest
   behavior of "NutCoreFormal"
   it should "pass" in {
     // config
-    val s = (FormalSettings()) ++ (InOrderSettings())
+    val s = (FormalSettings()) ++ (OOOSettings())
     s.foreach { Settings.settings += _ }
     Settings.settings.toList.sortBy(_._1)(Ordering.String).foreach {
       case (f, v: Long) =>

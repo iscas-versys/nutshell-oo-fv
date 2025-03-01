@@ -114,13 +114,13 @@ class NutCore(implicit val p: NutCoreConfig) extends NutCoreModule {
   
   // Backend
   if (EnableOutOfOrderExec) {
-    val mmioXbar = Module(new SimpleBusCrossbarNto1(if (HasDcache) 2 else 3))
+    val mmioXbar = Module(new SimpleBusCrossbarNto1(2))//if (HasDcache) 2 else 3))
     val backend = Module(new Backend_ooo)
     PipelineVector2Connect(new DecodeIO, frontend.io.out(0), frontend.io.out(1), backend.io.in(0), backend.io.in(1), frontend.io.flushVec(1), 16)
     backend.io.flush := frontend.io.flushVec(2)
     frontend.io.redirect <> backend.io.redirect
 
-    val dmemXbar = Module(new SimpleBusAutoIDCrossbarNto1(4, userBits = if (HasDcache) DCacheUserBundleWidth else 0))
+    val dmemXbar = Module(new SimpleBusAutoIDCrossbarNto1(4, userBits = DCacheUserBundleWidth))//DCacheUserBundleWidth else 0))
 
     val itlb = TLB(in = frontend.io.imem, mem = dmemXbar.io.in(2), flush = frontend.io.flushVec(0) | frontend.io.bpFlush, csrMMU = backend.io.memMMU.imem)(TLBConfig(name = "itlb", userBits = ICacheUserBundleWidth, totalEntry = 4))
     frontend.io.ipf := itlb.io.ipf
