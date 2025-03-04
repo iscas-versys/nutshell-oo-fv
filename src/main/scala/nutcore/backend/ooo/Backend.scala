@@ -395,6 +395,7 @@ class Backend_ooo(implicit val p: NutCoreConfig) extends NutCoreModule with HasR
   lsucommit.brMask := DontCare // FIXIT: gen lsucommit in LSU
   // fix exceptionVec
   lsucommit.decode.cf.exceptionVec := lsu.io.exceptionVec
+  lsucommit.follower := lsu.io.uopOut.follower
 
   // backend exceptions only come from LSU
   raiseBackendException := lsucommit.exception && lsu.io.out.fire

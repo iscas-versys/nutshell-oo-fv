@@ -89,6 +89,9 @@ class ROB(implicit val p: NutCoreConfig)
   val intrNO    = Reg(Vec(robSize, Vec(robWidth, UInt(XLEN.W))))
   val prf       = Mem(robSize * robWidth, UInt(XLEN.W))
 
+  // formal
+  val follower = Reg(Vec(robSize, Vec(robWidth, new PipelineFollower)))
+
   // lsroq
   // Currently, ROB is also used as lsroq when out of order store is enabled
   val load  = RegInit(VecInit(List.fill(robSize)(VecInit(List.fill(robWidth)(false.B)))))
@@ -217,6 +220,8 @@ class ROB(implicit val p: NutCoreConfig)
       // In several cases, FU will invalidate rfWen
       store(index)(bank)             := io.cdb(k).bits.store
       decode(index)(bank).ctrl.rfWen := io.cdb(k).bits.decode.ctrl.rfWen
+
+      follower(index)(bank) := io.cdb(k).bits.follower
     }
   }
 
@@ -614,7 +619,7 @@ class ROB(implicit val p: NutCoreConfig)
   BoringUtils.addSource(retireATerm, "perfCntCondMinstret")
   BoringUtils.addSource(retireMultiTerms, "perfCntCondMultiCommit")
   if (p.Formal && p.OOFormal) {
-    val checker = Module(new CheckerWithWB(checkMem = false, enableReg = true)(p.FormalOOConfig))
+    val checker = Module(new CheckerWithWB(checkMem = true, enableReg = true)(p.FormalOOConfig))
     val select  = WireInit(0.U)
     select := DontCare
 
@@ -646,7 +651,10 @@ class ROB(implicit val p: NutCoreConfig)
     checker.io.wb.csrNdata := 0.U
     checker.io.wb.csrWr    := false.B
 
-    // val mem = rvspeccore.checker.ConnectCheckerWb.makeMemSource()(64)
+    val mem = rvspeccore.checker.ConnectCheckerWb.makeMemSource()(64)
+
+    mem.read  := RegNext(formal(ringBufferTail)(select).mem.read)
+    mem.write := RegNext(formal(ringBufferTail)(select).mem.write)
 
     // val csr = rvspeccore.checker.ConnectCheckerWb.makeCSRSource()(64, p.FormalConfig)
 

@@ -18,6 +18,7 @@ package nutcore
 
 import chisel3._
 import chisel3.util._
+import rvspeccore.checker.ConnectCheckerWb.MemSig
 
 class CtrlSignalIO extends NutCoreBundle {
   val src1Type = Output(SrcType())
@@ -96,6 +97,7 @@ class OOCommitIO extends NutCoreBundle with HasBackendConst{
   val exception = Output(Bool())
   val store = Output(Bool())
   val brMask = Output(UInt(checkpointSize.W))
+  val follower = Output(new PipelineFollower)
 }
 
 class FunctionUnitIO extends NutCoreBundle {
@@ -171,4 +173,9 @@ class RenamedDecodeIO extends NutCoreBundle with HasBackendConst {
   val src1Rdy = Output(Bool())
   val src2Rdy = Output(Bool())
   val brMask = Output(UInt(checkpointSize.W))
+  val follower = Output(new PipelineFollower)
+}
+
+class PipelineFollower extends NutCoreBundle with HasBackendConst {
+  val mem = new MemSig()(64)
 }
