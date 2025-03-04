@@ -41,7 +41,8 @@ object DefaultSettings {
     "EnableDebug" -> true,
     "EnableRVC" -> true,
 
-    "Formal" -> false
+    "Formal" -> false,
+    "OOFormal" -> false
   )
 }
 
@@ -51,6 +52,7 @@ object FormalSettings {
     "NrExtIntr" -> 2,
 
     "Formal" -> true,
+    "OOFormal" -> true,
     "EnableILA" -> false,
 
     "HasL2cache" -> false,

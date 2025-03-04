@@ -34,11 +34,11 @@ class RegFile extends HasRegFileParameter with HasNutCoreParameter {
 
   // Formal
   // should wrapped by `if` here, but can not get NutCoreConfig
-  val resultRegWire = Wire(Vec(32, UInt(XLEN.W)))
-  resultRegWire := rf
-  resultRegWire(0) := 0.U
-  ConnectCheckerResult.setRegSource(resultRegWire)
-} 
+//   val resultRegWire = Wire(Vec(32, UInt(XLEN.W)))
+//   resultRegWire := rf
+//   resultRegWire(0) := 0.U
+//   ConnectCheckerResult.setRegSource(resultRegWire)
+}
 
 class ScoreBoard extends HasRegFileParameter {
   val busy = RegInit(0.U(NRReg.W))

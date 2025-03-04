@@ -99,7 +99,7 @@ class WBU(implicit val p: NutCoreConfig) extends NutCoreModule{
       BoringUtils.addSource(io.wb.rfDest, "ilaWBUrfDest")
       BoringUtils.addSource(io.wb.rfData, "ilaWBUrfData")
     }
-    if (p.Formal) {
+    if (p.Formal && !p.OOFormal) {
       val checker = Module(new CheckerWithResult(checkMem = true)(p.FormalConfig))
 
       checker.io.instCommit.valid := RegNext(io.in.valid, false.B)

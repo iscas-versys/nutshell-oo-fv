@@ -68,6 +68,7 @@ abstract class NutCoreBundle extends Bundle with HasNutCoreParameter with HasNut
 case class NutCoreConfig (
   FPGAPlatform: Boolean = true,
   Formal: Boolean = Settings.get("Formal"),
+  OOFormal: Boolean = Settings.get("OOFormal"),
   EnableILA: Boolean = Settings.get("EnableILA"),
   EnableDebug: Boolean = Settings.get("EnableDebug"),
   EnhancedLog: Boolean = true ,
@@ -80,8 +81,8 @@ case class NutCoreConfig (
   FormalOOConfig: RVConfig = RVConfig(
     XLEN = 64,
     extensions = "MC",
-    fakeExtensions = "",
-    functions = Seq()
+    //fakeExtensions = "",
+    //functions = Seq()
   )
 )
 // Enable EnhancedLog will slow down simulation, 
@@ -183,7 +184,7 @@ class NutCore(implicit val p: NutCoreConfig) extends NutCoreModule {
 
     io.mmio <> mmioXbar.io.out
 
-    if (p.FPGAPlatform && p.Formal) {
+    if (p.FPGAPlatform && p.Formal && !p.OOFormal) {
       val isRead  = RegInit(false.B)
       val isWrite = RegInit(false.B)
       val addr    = RegInit(0.U(39.W))

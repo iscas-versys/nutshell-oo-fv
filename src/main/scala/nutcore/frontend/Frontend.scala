@@ -56,7 +56,7 @@ class Frontend_ooo(implicit val p: NutCoreConfig) extends NutCoreModule with Has
     val speccsr = new SpecCSR()(64, p.FormalConfig)
     MuxLookup(addr, false.B, speccsr.table.map { x => x.info.addr -> true.B })
   }
-  if (p.Formal) {
+  if (p.Formal && p.OOFormal) {
     // here is the earliest place to assume the inst
     // before this, the inst may not been assemble/splite to 32bit
 
@@ -148,7 +148,7 @@ class Frontend_inorder(implicit val p: NutCoreConfig) extends NutCoreModule with
     val speccsr = new SpecCSR()(64, p.FormalConfig)
     MuxLookup(addr, false.B, speccsr.table.map { x => x.info.addr -> true.B })
   }
-  if (p.Formal) {
+  if (p.Formal && !p.OOFormal) {
     // here is the earliest place to assume the inst
     // before this, the inst may not been assemble/splite to 32bit
     val tmpInst = ibf.io.out.bits.instr(31, 0)

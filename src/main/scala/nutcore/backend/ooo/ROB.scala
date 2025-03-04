@@ -613,14 +613,20 @@ class ROB(implicit val p: NutCoreConfig)
   val retireMultiTerms = retireATerm && valid(ringBufferTail)(0) && valid(ringBufferTail)(1) && !instRedirect(0)
   BoringUtils.addSource(retireATerm, "perfCntCondMinstret")
   BoringUtils.addSource(retireMultiTerms, "perfCntCondMultiCommit")
-  if (p.Formal) {
+  if (p.Formal && p.OOFormal) {
     val checker = Module(new CheckerWithWB(checkMem = false, enableReg = true)(p.FormalOOConfig))
     val select  = WireInit(0.U)
     select := DontCare
 
     checker.io.instCommit.inst := RegNext(decode(ringBufferTail)(select).cf.instr)
     checker.io.instCommit.pc   := RegNext(SignExt(decode(ringBufferTail)(select).cf.pc, AddrBits))
-    checker.io.instCommit.npc  := 0.U
+    checker.io.instCommit.npc := RegNext(
+      Mux(
+        redirect(ringBufferTail)(select).valid,
+        redirect(ringBufferTail)(select).target,
+        decode(ringBufferTail)(select).cf.pnpc
+      )
+    )
     when(select === 0.U) {
       checker.io.instCommit.valid := RegNext(retireATerm)
     }.otherwise {
@@ -630,19 +636,19 @@ class ROB(implicit val p: NutCoreConfig)
     checker.io.wb.valid := RegNext(
       io.wb(select).rfWen && io.wb(select).rfDest =/= 0.U
     )
-    checker.io.wb.dest := RegNext(io.wb(select).rfDest)
-    checker.io.wb.data := RegNext(io.wb(select).rfData)
-    checker.io.wb.r1Addr := RegNext(decode(ringBufferTail)(select).ctrl.rfSrc1)
-    checker.io.wb.r2Addr := RegNext(decode(ringBufferTail)(select).ctrl.rfSrc2)
-    checker.io.wb.r1Data := RegNext(decode(ringBufferTail)(select).data.src1)
-    checker.io.wb.r2Data := RegNext(decode(ringBufferTail)(select).data.src2)
-    checker.io.wb.csrAddr := 0.U
-    checker.io.wb.csrNdata:= 0.U
-    checker.io.wb.csrWr   := false.B
+    checker.io.wb.dest     := RegNext(io.wb(select).rfDest)
+    checker.io.wb.data     := RegNext(io.wb(select).rfData)
+    checker.io.wb.r1Addr   := RegNext(decode(ringBufferTail)(select).ctrl.rfSrc1)
+    checker.io.wb.r2Addr   := RegNext(decode(ringBufferTail)(select).ctrl.rfSrc2)
+    checker.io.wb.r1Data   := RegNext(decode(ringBufferTail)(select).data.src1)
+    checker.io.wb.r2Data   := RegNext(decode(ringBufferTail)(select).data.src2)
+    checker.io.wb.csrAddr  := 0.U
+    checker.io.wb.csrNdata := 0.U
+    checker.io.wb.csrWr    := false.B
 
-    //val mem = rvspeccore.checker.ConnectCheckerWb.makeMemSource()(64)
+    // val mem = rvspeccore.checker.ConnectCheckerWb.makeMemSource()(64)
 
-    //val csr = rvspeccore.checker.ConnectCheckerWb.makeCSRSource()(64, p.FormalConfig)
+    // val csr = rvspeccore.checker.ConnectCheckerWb.makeCSRSource()(64, p.FormalConfig)
 
     ConnectCheckerWb.setChecker(checker)(XLEN, p.FormalOOConfig)
   }
