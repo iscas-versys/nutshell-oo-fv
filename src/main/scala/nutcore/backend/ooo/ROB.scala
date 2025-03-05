@@ -653,8 +653,8 @@ class ROB(implicit val p: NutCoreConfig)
 
     val mem = rvspeccore.checker.ConnectCheckerWb.makeMemSource()(64)
 
-    mem.read  := RegNext(formal(ringBufferTail)(select).mem.read)
-    mem.write := RegNext(formal(ringBufferTail)(select).mem.write)
+    mem.read  := RegNext(follower(ringBufferTail)(select).mem.read)
+    mem.write := RegNext(follower(ringBufferTail)(select).mem.write)
 
     // val csr = rvspeccore.checker.ConnectCheckerWb.makeCSRSource()(64, p.FormalConfig)
 

@@ -105,6 +105,7 @@ class WBU(implicit val p: NutCoreConfig) extends NutCoreModule{
       checker.io.instCommit.valid := RegNext(io.in.valid, false.B)
       checker.io.instCommit.inst  := RegNext(io.in.bits.decode.cf.instr)
       checker.io.instCommit.pc    := RegNext(SignExt(io.in.bits.decode.cf.pc, AddrBits))
+      checker.io.instCommit.npc   := DontCare
 
       ConnectCheckerResult.setChecker(checker)(XLEN, p.FormalConfig)
 

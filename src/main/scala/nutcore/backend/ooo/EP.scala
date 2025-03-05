@@ -28,6 +28,7 @@ class ExecutionPipeline extends NutCoreModule {
   io.out.bits.intrNO := 0.U
   io.out.bits.exception := false.B
   io.out.bits.store := false.B
+  io.out.bits.follower := 0.U.asTypeOf(new PipelineFollower)
 }
 
 class ALUEP extends ExecutionPipeline {

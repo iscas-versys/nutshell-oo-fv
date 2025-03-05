@@ -144,6 +144,7 @@ class Backend_ooo(implicit val p: NutCoreConfig) extends NutCoreModule with HasR
     inst(i).src1Rdy := !rob.io.rvalid(2*i) || rob.io.rcommited(2*i)
     inst(i).src2Rdy := !rob.io.rvalid(2*i+1) || rob.io.rcommited(2*i+1)
     inst(i).brMask := DontCare
+    inst(i).follower := 0.U.asTypeOf(new PipelineFollower)
     // read rf, update src
     inst(i).decode.data.src1 := rf.read(rfSrc(2*i)) 
     when(rob.io.rvalid(2*i) && rob.io.rcommited(2*i)){inst(i).decode.data.src1 := rob.io.rprf(2*i)}
@@ -331,6 +332,7 @@ class Backend_ooo(implicit val p: NutCoreConfig) extends NutCoreModule with HasR
   brucommit.decode.cf.redirect := bru.io.redirect
   brucommit.exception := false.B
   brucommit.store := false.B
+  brucommit.follower := 0.U.asTypeOf(new PipelineFollower)
 
   bruDelayer.io.in.bits := brucommit
   bruDelayer.io.in.valid := bru.io.out.valid
@@ -426,6 +428,7 @@ class Backend_ooo(implicit val p: NutCoreConfig) extends NutCoreModule with HasR
   mducommit.exception := false.B
   mducommit.store := false.B
   mducommit.brMask := mdurs.io.out.bits.brMask
+  mducommit.follower := 0.U.asTypeOf(new PipelineFollower)
   mdurs.io.commit.get := mdu.io.out.valid
 
   // assert(!(mdu.io.out.valid && !mduDelayer.io.in.ready))
@@ -463,6 +466,7 @@ class Backend_ooo(implicit val p: NutCoreConfig) extends NutCoreModule with HasR
   csrcommit.exception := false.B
   csrcommit.store := false.B
   csrcommit.brMask := DontCare //FIXIT
+  csrcommit.follower := 0.U.asTypeOf(new PipelineFollower)
   // fix wen
   when(csr.io.wenFix){csrcommit.decode.ctrl.rfWen := false.B}
 
@@ -491,6 +495,7 @@ class Backend_ooo(implicit val p: NutCoreConfig) extends NutCoreModule with HasR
   moucommit.exception := false.B
   moucommit.store := false.B
   moucommit.brMask := DontCare //FIXIT
+  moucommit.follower := 0.U.asTypeOf(new PipelineFollower)
 
   // ------------------------------------------------
   // Backend stage 3+
